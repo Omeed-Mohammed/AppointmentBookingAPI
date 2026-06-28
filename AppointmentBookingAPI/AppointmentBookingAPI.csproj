@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.28" />
+    <PackageReference Include="Scrutor" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppointmentBookingAPI.Infrastructure\AppointmentBookingAPI.Infrastructure.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Mappers\AppointmentBookingAPI.Mappers.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Middleware\AppointmentBookingAPI.Middleware.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Modules.Appointment\AppointmentBookingAPI.Modules.Appointment.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Modules.Auth\AppointmentBookingAPI.Modules.Auth.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Modules.Core\AppointmentBookingAPI.Modules.Core.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Modules.Logs\AppointmentBookingAPI.Modules.Logs.csproj" />
+    <ProjectReference Include="..\AppointmentBookingAPI.Validators\AppointmentBookingAPI.Validators.csproj" />
+    <ProjectReference Include="..\Contracts\AppointmentBookingAPI.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
