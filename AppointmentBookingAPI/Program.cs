@@ -1,10 +1,13 @@
 using AppointmentBookingAPI;
+using AppointmentBookingAPI.Infrastructure.Appointment.Repositories;
 using AppointmentBookingAPI.Infrastructure.Auth.Repositories;
 using AppointmentBookingAPI.Infrastructure.Core.Repositories;
 using AppointmentBookingAPI.Middleware.Exceptions;
 using AppointmentBookingAPI.Middleware.Filters;
+using AppointmentBookingAPI.Modules.Appointment.Patient;
 using AppointmentBookingAPI.Modules.Auth.User;
 using AppointmentBookingAPI.Modules.Core;
+using AppointmentBookingAPI.Validators.Appointment.Patient;
 using AppointmentBookingAPI.Validators.Auth;
 using AppointmentBookingAPI.Validators.Core;
 using FluentValidation;
@@ -19,13 +22,15 @@ var builder = WebApplication.CreateBuilder(args);
 var serviceAssemblies = new[]
 {
     typeof(PersonService).Assembly,
-    typeof(UserService).Assembly
+    typeof(UserService).Assembly,
+    typeof(PatientService).Assembly
 };
 
 var repositoryAssemblies = new[]
 {
     typeof(PersonRepository).Assembly,
-    typeof(UserRepository).Assembly
+    typeof(UserRepository).Assembly,
+    typeof(PatientRepository).Assembly
 };
 
 builder.Services.Scan(scan => scan
@@ -43,6 +48,7 @@ builder.Services.Scan(scan => scan
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePersonValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ChangePasswordValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientValidator>();
 
 builder.Services.AddControllers(options =>
 {

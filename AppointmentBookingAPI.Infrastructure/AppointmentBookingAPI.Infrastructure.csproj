@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Contracts\AppointmentBookingAPI.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Login\" />
+  </ItemGroup>
+
 </Project>

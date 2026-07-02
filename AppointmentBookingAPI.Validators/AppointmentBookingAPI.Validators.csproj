@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Appointment\" />
     <Folder Include="Logs\" />
   </ItemGroup>
 
