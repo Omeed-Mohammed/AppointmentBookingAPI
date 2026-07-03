@@ -2,14 +2,17 @@ using AppointmentBookingAPI;
 using AppointmentBookingAPI.Infrastructure.Appointment.Repositories;
 using AppointmentBookingAPI.Infrastructure.Auth.Repositories;
 using AppointmentBookingAPI.Infrastructure.Core.Repositories;
+using AppointmentBookingAPI.Infrastructure.Logs.Repositories;
 using AppointmentBookingAPI.Middleware.Exceptions;
 using AppointmentBookingAPI.Middleware.Filters;
 using AppointmentBookingAPI.Modules.Appointment.Patient;
 using AppointmentBookingAPI.Modules.Auth.User;
 using AppointmentBookingAPI.Modules.Core;
+using AppointmentBookingAPI.Modules.Logs;
 using AppointmentBookingAPI.Validators.Appointment.Patient;
 using AppointmentBookingAPI.Validators.Auth;
 using AppointmentBookingAPI.Validators.Core;
+using AppointmentBookingAPI.Validators.Logs.ActivityLog;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -23,14 +26,16 @@ var serviceAssemblies = new[]
 {
     typeof(PersonService).Assembly,
     typeof(UserService).Assembly,
-    typeof(PatientService).Assembly
+    typeof(PatientService).Assembly,
+    typeof(ActivityLogService).Assembly
 };
 
 var repositoryAssemblies = new[]
 {
     typeof(PersonRepository).Assembly,
     typeof(UserRepository).Assembly,
-    typeof(PatientRepository).Assembly
+    typeof(PatientRepository).Assembly,
+    typeof(ActivityLogRepository).Assembly
 };
 
 builder.Services.Scan(scan => scan
@@ -49,6 +54,7 @@ builder.Services.Scan(scan => scan
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePersonValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ChangePasswordValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ActivityLogSearchByUserValidator>();
 
 builder.Services.AddControllers(options =>
 {
