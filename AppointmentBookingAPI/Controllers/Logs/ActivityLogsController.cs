@@ -1,5 +1,6 @@
 ﻿using AppointmentBookingAPI.Contracts.Common;
 using AppointmentBookingAPI.Contracts.Logs.DTOs.ActivityLogs;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Modules.Logs;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentBookingAPI.Controllers.Logs
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class ActivityLogsController : ControllerBase
@@ -15,16 +17,21 @@ namespace AppointmentBookingAPI.Controllers.Logs
         private readonly ActivityLogService _service;
         private readonly IValidator<string> _searchByUserValidator;
         private readonly IValidator<(DateTime FromDate, DateTime ToDate)> _dateValidator;
+        private readonly CurrentUserService _currentUserService;
 
         public ActivityLogsController(
             ActivityLogService service,
             IValidator<string> searchByUserValidator,
-            IValidator<(DateTime FromDate, DateTime ToDate)> dateValidator)
+            IValidator<(DateTime FromDate, DateTime ToDate)> dateValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
             _searchByUserValidator = searchByUserValidator;
             _dateValidator = dateValidator;
+            _currentUserService = currentUserService;
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
 
 
         [HttpGet("{logID:int}", Name = "GetActivityLogByID")]
@@ -38,13 +45,12 @@ namespace AppointmentBookingAPI.Controllers.Logs
             return Ok(new ApiResponse<ActivityLogDto>(true, "Success.", log));
         }
 
-        [Authorize]
         [HttpGet(Name = "GetAllActivityLogs")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetAll()
         {
-            var logs = _service.GetAll("Admin");
+            var logs = _service.GetAll(CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<ActivityLogDto>>(true, "Success.", logs));
         }
@@ -68,7 +74,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
                 ));
             }
 
-            var logs = _service.SearchByUser(performedBy, "Admin");
+            var logs = _service.SearchByUser(performedBy, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<ActivityLogDto>>(true, "Success.", logs));
         }
@@ -92,7 +98,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
                 ));
             }
 
-            var logs = _service.SearchByDate(fromDate, toDate, "Admin");
+            var logs = _service.SearchByDate(fromDate, toDate, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<ActivityLogDto>>(true, "Success.", logs));
         }
@@ -116,7 +122,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
                 ));
             }
 
-            _service.DeleteByDate(fromDate, toDate, "Admin");
+            _service.DeleteByDate(fromDate, toDate, CurrentUser);
 
             return Ok(new ApiResponse<string>(true, "Activity logs deleted successfully.", null!));
         }

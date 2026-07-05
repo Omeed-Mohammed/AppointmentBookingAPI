@@ -1,26 +1,36 @@
 ﻿using AppointmentBookingAPI.Contracts.Common;
 using AppointmentBookingAPI.Contracts.Logs.DTOs.ErrorLogs;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Modules.Logs;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentBookingAPI.Controllers.Logs
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class ErrorLogsController : ControllerBase
     {
         private readonly ErrorLogService _service;
         private readonly IValidator<(DateTime FromDate, DateTime ToDate)> _dateValidator;
+        private readonly CurrentUserService _currentUserService;
 
         public ErrorLogsController(
             ErrorLogService service,
-            IValidator<(DateTime FromDate, DateTime ToDate)> dateValidator)
+            IValidator<(DateTime FromDate, DateTime ToDate)> dateValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
             _dateValidator = dateValidator;
+            _currentUserService = currentUserService;
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
+
 
         [HttpGet("{logID:int}", Name = "GetErrorLogByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -28,7 +38,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByID(int logID)
         {
-            var log = _service.GetByID(logID, "Admin");
+            var log = _service.GetByID(logID, CurrentUser);
 
             return Ok(new ApiResponse<ErrorLogDto>(true, "Success.", log));
         }
@@ -56,7 +66,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
                 }
             }
 
-            var logs = _service.GetAll(appUser, fromDate, toDate, "Admin");
+            var logs = _service.GetAll(appUser, fromDate, toDate, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<ErrorLogDto>>(true, "Success.", logs));
         }
@@ -79,7 +89,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
                 ));
             }
 
-            _service.DeleteByDate(fromDate, toDate, "Admin");
+            _service.DeleteByDate(fromDate, toDate, CurrentUser);
 
             return Ok(new ApiResponse<string>(true, "Error logs deleted successfully.", null!));
         }

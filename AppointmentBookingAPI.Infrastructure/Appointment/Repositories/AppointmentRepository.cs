@@ -88,6 +88,32 @@ namespace AppointmentBookingAPI.Infrastructure.Appointment.Repositories
         }
 
 
+        public IEnumerable<AppointmentDto> GetBySpecialistID(int specialistID,int? appointmentStatusID,string currentUser)
+        {
+            using var connection = new SqlConnection(_cs);
+            using var command = new SqlCommand("appointment.SP_Appointment_GetBySpecialistID", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.Add("@SpecialistID", SqlDbType.Int).Value = specialistID;
+            command.Parameters.Add("@AppointmentStatusID", SqlDbType.Int).Value =(object?)appointmentStatusID ?? DBNull.Value;
+            command.Parameters.Add("@CurrentUser", SqlDbType.NVarChar, 100).Value = currentUser;
+
+            connection.Open();
+
+            using var reader = command.ExecuteReader();
+
+            List<AppointmentDto> appointments = [];
+
+            while (reader.Read())
+            {
+                appointments.Add(MapAppointment(reader));
+            }
+
+            return appointments;
+        }
+
+
         public AppointmentDto? GetByReferenceNumber(string referenceNumber, string currentUser)
         {
             using var connection = new SqlConnection(_cs);

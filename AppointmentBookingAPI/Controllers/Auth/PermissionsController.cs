@@ -1,14 +1,17 @@
 ﻿using AppointmentBookingAPI.Contracts.Auth.DTOs;
 using AppointmentBookingAPI.Contracts.Auth.Requests.Permission;
 using AppointmentBookingAPI.Contracts.Common;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Mappers.Auth;
 using AppointmentBookingAPI.Modules.Auth.Permission;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentBookingAPI.Controllers.Auth
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class PermissionsController : ControllerBase
@@ -16,16 +19,24 @@ namespace AppointmentBookingAPI.Controllers.Auth
         private readonly PermissionService _service;
         private readonly IValidator<AddPermissionRequest> _createPermissionValidator;
         private readonly IValidator<UpdatePermissionRequest> _updatePermissionValidator;
+        private readonly CurrentUserService _currentUserService;
+
 
         public PermissionsController(
             PermissionService service,
             IValidator<AddPermissionRequest> createPermissionValidator,
-            IValidator<UpdatePermissionRequest> updatePermissionValidator)
+            IValidator<UpdatePermissionRequest> updatePermissionValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
             _createPermissionValidator = createPermissionValidator;
             _updatePermissionValidator = updatePermissionValidator;
+            _currentUserService = currentUserService;
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
+
 
         [HttpPost(Name = "AddPermission")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -49,7 +60,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
 
             var permissionDto = PermissionMapper.ToDto(request);
 
-            int permissionID = _service.Add(permissionDto, "Admin");
+            int permissionID = _service.Add(permissionDto, CurrentUser);
 
             return CreatedAtAction(
                 nameof(GetByID),
@@ -98,7 +109,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByID(int permissionID)
         {
-            var permission = _service.GetByID(permissionID, "Admin");
+            var permission = _service.GetByID(permissionID, CurrentUser);
 
             return Ok(new ApiResponse<PermissionDto>(true, "Success.", permission));
         }
@@ -110,7 +121,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetAll(bool? isActive)
         {
-            var permissions = _service.GetAll(isActive, "Admin");
+            var permissions = _service.GetAll(isActive, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<PermissionDto>>(true, "Success.", permissions));
         }
@@ -124,7 +135,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Deactivate(int permissionID)
         {
-            _service.Deactivate(permissionID, "Admin");
+            _service.Deactivate(permissionID, CurrentUser);
 
             return Ok(new ApiResponse<int>
             (
@@ -143,7 +154,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Reactivate(int permissionID)
         {
-            _service.Reactivate(permissionID, "Admin");
+            _service.Reactivate(permissionID, CurrentUser);
 
             return Ok(new ApiResponse<int>
             (

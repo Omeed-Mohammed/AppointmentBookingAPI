@@ -45,6 +45,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentBookingAPI.Valid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentBookingAPI.Middleware", "..\AppointmentBookingAPI.Middleware\AppointmentBookingAPI.Middleware.csproj", "{EE64DB57-CBA7-4566-9C71-DACB05267170}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppointmentBookingAPI.CurrentUser", "..\AppointmentBookingAPI.CurrentUser\AppointmentBookingAPI.CurrentUser.csproj", "{32D764D8-8946-461E-A003-6E846352A4B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CurrentUser", "CurrentUser", "{CFCBAC2C-A7E8-4AB7-AEC2-08C64591C6F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +95,10 @@ Global
 		{EE64DB57-CBA7-4566-9C71-DACB05267170}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE64DB57-CBA7-4566-9C71-DACB05267170}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE64DB57-CBA7-4566-9C71-DACB05267170}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32D764D8-8946-461E-A003-6E846352A4B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32D764D8-8946-461E-A003-6E846352A4B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32D764D8-8946-461E-A003-6E846352A4B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32D764D8-8946-461E-A003-6E846352A4B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +118,7 @@ Global
 		{FA74D5E9-78B5-4795-B0ED-F01B3F3BE90E} = {7DC331D0-3EC4-40A6-69FB-1CBEB2E0D1EA}
 		{EEDFF909-6692-4792-BEB6-3D156C43B8A7} = {AC40F098-1FB9-4E71-B8DB-BC1D03AB66E0}
 		{EE64DB57-CBA7-4566-9C71-DACB05267170} = {643747C7-0307-8931-84D8-A7D1915E22E5}
+		{32D764D8-8946-461E-A003-6E846352A4B9} = {CFCBAC2C-A7E8-4AB7-AEC2-08C64591C6F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {29682F2B-FBC7-4036-B6C6-86C2DCDEA1AE}

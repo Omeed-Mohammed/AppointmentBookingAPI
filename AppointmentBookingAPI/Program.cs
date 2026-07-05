@@ -1,4 +1,6 @@
 using AppointmentBookingAPI;
+using AppointmentBookingAPI.CurrentUser;
+using AppointmentBookingAPI.Helpers;
 using AppointmentBookingAPI.Infrastructure.Appointment.Repositories;
 using AppointmentBookingAPI.Infrastructure.Auth.Repositories;
 using AppointmentBookingAPI.Infrastructure.Core.Repositories;
@@ -17,9 +19,11 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Scrutor;
 using System.Text;
-using Microsoft.OpenApi.Models;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +32,9 @@ var serviceAssemblies = new[]
     typeof(PersonService).Assembly,
     typeof(UserService).Assembly,
     typeof(PatientService).Assembly,
-    typeof(ActivityLogService).Assembly
+    typeof(ActivityLogService).Assembly,
+    typeof(CurrentUserService).Assembly,
+
 };
 
 var repositoryAssemblies = new[]
@@ -36,7 +42,8 @@ var repositoryAssemblies = new[]
     typeof(PersonRepository).Assembly,
     typeof(UserRepository).Assembly,
     typeof(PatientRepository).Assembly,
-    typeof(ActivityLogRepository).Assembly
+    typeof(ActivityLogRepository).Assembly,
+
 };
 
 builder.Services.Scan(scan => scan
@@ -50,6 +57,10 @@ builder.Services.Scan(scan => scan
     .AddClasses(c => c.Where(t => t.Name.EndsWith("Repository")))
     .AsImplementedInterfaces()
     .WithScopedLifetime());
+
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<OwnershipService>();
 
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePersonValidator>();

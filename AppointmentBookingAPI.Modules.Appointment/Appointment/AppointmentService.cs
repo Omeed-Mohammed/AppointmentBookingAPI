@@ -68,6 +68,18 @@ namespace AppointmentBookingAPI.Modules.Appointment.Appointment
             return _appointmentRepository.GetByID(appointmentID, currentUser);
         }
 
+
+        public IEnumerable<AppointmentDto> GetBySpecialistID(int specialistID,int? appointmentStatusID,string currentUser)
+        {
+            if (specialistID <= 0)
+                throw new ArgumentException("Invalid SpecialistID.");
+
+            return _appointmentRepository.GetBySpecialistID(
+                specialistID,
+                appointmentStatusID,
+                currentUser);
+        }
+
         public AppointmentDto? GetByReferenceNumber(string referenceNumber, string currentUser)
         {
             if (string.IsNullOrWhiteSpace(referenceNumber))

@@ -1,27 +1,37 @@
 ﻿using AppointmentBookingAPI.Contracts.Common;
 using AppointmentBookingAPI.Contracts.Core.DTOs;
 using AppointmentBookingAPI.Contracts.Core.Requests;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Mappers.Core;
 using AppointmentBookingAPI.Modules.Core;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace AppointmentBookingAPI.Controllers.Core
 {
+    [Authorize(Roles = "Administrator,Receptionist")]
     [Route("api/[controller]")]
     [ApiController]
     public class PersonPhoneNumbersController : ControllerBase
     {
         private readonly PersonPhoneNumberService _service;
         private readonly IValidator<UpdatePersonPhoneNumberRequest> _updatePersonPhoneNumberValidator;
+        private readonly CurrentUserService _currentUserService;
 
-        public PersonPhoneNumbersController(PersonPhoneNumberService service, IValidator<UpdatePersonPhoneNumberRequest> updatePersonPhoneNumberValidator)
+        public PersonPhoneNumbersController(PersonPhoneNumberService service, 
+            IValidator<UpdatePersonPhoneNumberRequest> updatePersonPhoneNumberValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
             _updatePersonPhoneNumberValidator = updatePersonPhoneNumberValidator;
+            _currentUserService = currentUserService;
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
 
         [HttpPost(Name = "AddPersonPhoneNumber")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -31,7 +41,7 @@ namespace AppointmentBookingAPI.Controllers.Core
         {
             var phoneDto = PersonPhoneNumberMapper.ToDto(request);
 
-            int phoneID = _service.Add(phoneDto, "Admin");
+            int phoneID = _service.Add(phoneDto, CurrentUser);
 
             return CreatedAtAction(
                 nameof(GetByPersonID),
@@ -60,7 +70,7 @@ namespace AppointmentBookingAPI.Controllers.Core
 
             var phoneDto = PersonPhoneNumberMapper.ToDto(request);
 
-            bool result = _service.Update(phoneDto, "Admin");
+            bool result = _service.Update(phoneDto, CurrentUser);
 
             return Ok(new ApiResponse<bool>(true, "Phone number updated successfully.", result));
         }
@@ -71,7 +81,7 @@ namespace AppointmentBookingAPI.Controllers.Core
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByPersonID(int personID)
         {
-            var phoneNumbers = _service.GetByPersonID(personID, "Admin");
+            var phoneNumbers = _service.GetByPersonID(personID, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<PersonPhoneNumberDto>>(
                 true,

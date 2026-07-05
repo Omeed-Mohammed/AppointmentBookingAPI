@@ -1,14 +1,17 @@
 ﻿using AppointmentBookingAPI.Contracts.Auth.DTOs;
 using AppointmentBookingAPI.Contracts.Auth.Requests.UserRole;
 using AppointmentBookingAPI.Contracts.Common;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Mappers.Auth;
 using AppointmentBookingAPI.Modules.Auth.UserRole;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentBookingAPI.Controllers.Auth
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserRolesController : ControllerBase
@@ -16,16 +19,23 @@ namespace AppointmentBookingAPI.Controllers.Auth
         private readonly UserRoleService _service;
         private readonly IValidator<AddUserRoleRequest> _addValidator;
         private readonly IValidator<RemoveUserRoleRequest> _removeValidator;
+        private readonly CurrentUserService _currentUserService;
+
 
         public UserRolesController(
             UserRoleService service,
             IValidator<AddUserRoleRequest> addValidator,
-            IValidator<RemoveUserRoleRequest> removeValidator)
+            IValidator<RemoveUserRoleRequest> removeValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
             _addValidator = addValidator;
             _removeValidator = removeValidator;
+            _currentUserService = currentUserService;
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
 
         [HttpPost(Name = "AddUserRole")]
         public IActionResult Add(AddUserRoleRequest request)
@@ -44,7 +54,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
 
             var dto = UserRoleMapper.ToDto(request);
 
-            _service.Add(dto, "Admin");
+            _service.Add(dto, CurrentUser);
 
             return Created(
                 string.Empty,
@@ -68,7 +78,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
 
             var dto = UserRoleMapper.ToDto(request);
 
-            _service.Remove(dto, "Admin");
+            _service.Remove(dto, CurrentUser);
 
             return Ok(new ApiResponse<bool>(true, "Role removed successfully.", true));
         }
@@ -76,7 +86,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [HttpGet("user/{userID:int}", Name = "GetUserRolesByUserID")]
         public IActionResult GetByUserID(int userID)
         {
-            var data = _service.GetByUserID(userID, "Admin");
+            var data = _service.GetByUserID(userID, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<UserRoleDto>>(true, "Success.", data));
         }
@@ -84,7 +94,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [HttpGet("role/{roleID:int}", Name = "GetUserRolesByRoleID")]
         public IActionResult GetByRoleID(int roleID)
         {
-            var data = _service.GetByRoleID(roleID, "Admin");
+            var data = _service.GetByRoleID(roleID, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<UserRoleDto>>(true, "Success.", data));
         }

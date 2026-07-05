@@ -56,6 +56,20 @@ namespace AppointmentBookingAPI.Modules.Appointment.Specialist
             return specialist;
         }
 
+
+        public SpecialistDto GetByPersonID(int personID, string currentUser)
+        {
+            if (personID <= 0)
+                throw new ArgumentException("Invalid PersonID.");
+
+            SpecialistDto? specialist = _specialistRepository.GetByPersonID(personID, currentUser);
+
+            if (specialist == null)
+                throw new KeyNotFoundException("Specialist not found.");
+
+            return specialist;
+        }
+
         public IEnumerable<SpecialistDto> GetAll(bool? isActive, string currentUser)
         {
             return _specialistRepository.GetAll(isActive, currentUser);

@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppointmentBookingAPI.CurrentUser\AppointmentBookingAPI.CurrentUser.csproj" />
     <ProjectReference Include="..\AppointmentBookingAPI.Infrastructure\AppointmentBookingAPI.Infrastructure.csproj" />
     <ProjectReference Include="..\AppointmentBookingAPI.Mappers\AppointmentBookingAPI.Mappers.csproj" />
     <ProjectReference Include="..\AppointmentBookingAPI.Middleware\AppointmentBookingAPI.Middleware.csproj" />

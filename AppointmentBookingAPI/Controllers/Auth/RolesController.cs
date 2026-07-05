@@ -1,14 +1,17 @@
 ﻿using AppointmentBookingAPI.Contracts.Auth.DTOs;
 using AppointmentBookingAPI.Contracts.Auth.Requests.Roll;
 using AppointmentBookingAPI.Contracts.Common;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Mappers.Auth;
 using AppointmentBookingAPI.Modules.Auth.Rolls;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentBookingAPI.Controllers.Auth
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class RolesController : ControllerBase
@@ -16,16 +19,23 @@ namespace AppointmentBookingAPI.Controllers.Auth
         private readonly RoleService _service;
         private readonly IValidator<AddRoleRequest> _createRoleValidator;
         private readonly IValidator<UpdateRoleRequest> _updateRoleValidator;
+        private readonly CurrentUserService _currentUserService;
 
         public RolesController(
             RoleService service,
             IValidator<AddRoleRequest> createRoleValidator,
-            IValidator<UpdateRoleRequest> updateRoleValidator)
+            IValidator<UpdateRoleRequest> updateRoleValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
             _createRoleValidator = createRoleValidator;
             _updateRoleValidator = updateRoleValidator;
+            _currentUserService = currentUserService;
         }
+
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
 
         [HttpPost(Name = "AddRole")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -47,7 +57,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
 
             var roleDto = RoleMapper.ToDto(request);
 
-            int roleID = _service.Add(roleDto, "Admin");
+            int roleID = _service.Add(roleDto, CurrentUser);
 
             return CreatedAtAction(
                 nameof(GetByID),
@@ -76,7 +86,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
 
             var roleDto = RoleMapper.ToDto(request);
 
-            _service.Update(roleDto, "Admin");
+            _service.Update(roleDto, CurrentUser);
 
             return Ok(new ApiResponse<int>
             (
@@ -92,7 +102,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByID(int roleID)
         {
-            var role = _service.GetByID(roleID, "Admin");
+            var role = _service.GetByID(roleID, CurrentUser);
 
             return Ok(new ApiResponse<RoleDto>(true, "Success.", role));
         }
@@ -102,7 +112,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetAll(bool? isActive)
         {
-            var roles = _service.GetAll(isActive, "Admin");
+            var roles = _service.GetAll(isActive, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<RoleDto>>(true, "Success.", roles));
         }
@@ -115,7 +125,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Deactivate(int roleID)
         {
-            _service.Deactivate(roleID, "Admin");
+            _service.Deactivate(roleID, CurrentUser);
 
             return Ok(new ApiResponse<int>
             (
@@ -132,7 +142,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Reactivate(int roleID)
         {
-            _service.Reactivate(roleID, "Admin");
+            _service.Reactivate(roleID, CurrentUser);
 
             return Ok(new ApiResponse<int>
             (

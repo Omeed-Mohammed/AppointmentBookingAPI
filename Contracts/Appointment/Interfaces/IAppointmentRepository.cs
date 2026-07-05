@@ -18,5 +18,7 @@ namespace AppointmentBookingAPI.Contracts.Appointment.Interfaces
         AppointmentDto? GetByReferenceNumber(string referenceNumber, string currentUser);
 
         IEnumerable<AppointmentDto> GetAll(int? appointmentStatusID, string currentUser);
+
+        IEnumerable<AppointmentDto> GetBySpecialistID(int specialistID, int? appointmentStatusID, string currentUser);
     }
 }

@@ -1,16 +1,19 @@
 ﻿using AppointmentBookingAPI.Contracts.Common;
 using AppointmentBookingAPI.Contracts.Core.DTOs;
 using AppointmentBookingAPI.Contracts.Core.Requests;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Mappers.Core;
 using AppointmentBookingAPI.Modules.Core;
 using AppointmentBookingAPI.Validators.Core;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
 
 
 namespace AppointmentBookingAPI.Controllers.Core
 {
+    [Authorize(Roles = "Administrator,Receptionist")]
     [Route("api/[controller]")]
     [ApiController]
     public class PersonsController : ControllerBase
@@ -18,15 +21,22 @@ namespace AppointmentBookingAPI.Controllers.Core
         private readonly PersonService _service;
         private readonly IValidator<CreatePersonRequest> _createPersonValidator;
         private readonly IValidator<UpdatePersonRequest> _updatePersonValidator;
+        private readonly CurrentUserService _currentUserService;
 
         public PersonsController(
         PersonService service,
-        IValidator<CreatePersonRequest> createPersonValidator , IValidator<UpdatePersonRequest> updatePersonValidator)
+        IValidator<CreatePersonRequest> createPersonValidator , 
+        IValidator<UpdatePersonRequest> updatePersonValidator, CurrentUserService currentUserService)
         {
             _service = service;
             _createPersonValidator = createPersonValidator;
             _updatePersonValidator = updatePersonValidator;
+            _currentUserService = currentUserService;
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
+
 
         [HttpPost(Name = "AddPerson")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -49,7 +59,7 @@ namespace AppointmentBookingAPI.Controllers.Core
 
             var personDto = PersonMapper.ToDto(request);
 
-            int personID = _service.Add(personDto, "Admin");
+            int personID = _service.Add(personDto, CurrentUser);
 
             return CreatedAtAction(
                 nameof(GetByID),
@@ -81,7 +91,7 @@ namespace AppointmentBookingAPI.Controllers.Core
 
             var personDto = PersonMapper.ToDto(request);
 
-            _service.Update(personDto, "Admin");
+            _service.Update(personDto, CurrentUser);
 
             return Ok(new ApiResponse<int>(
             success: true,
@@ -95,7 +105,7 @@ namespace AppointmentBookingAPI.Controllers.Core
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByID(int personID)
         {
-            var person = _service.GetByID(personID, "Admin");
+            var person = _service.GetByID(personID, CurrentUser);
 
             return Ok(new ApiResponse<PersonDto>(true, "Success.", person));
         }
@@ -105,7 +115,7 @@ namespace AppointmentBookingAPI.Controllers.Core
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetAll()
         {
-            var persons = _service.GetAll("Admin");
+            var persons = _service.GetAll(CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<PersonDto>>(true, "Success.", persons));
         }

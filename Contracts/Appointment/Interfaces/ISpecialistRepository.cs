@@ -1,4 +1,5 @@
-﻿using AppointmentBookingAPI.Contracts.Appointment.DTOs.Specialist;
+﻿using AppointmentBookingAPI.Contracts.Appointment.DTOs.Appointment;
+using AppointmentBookingAPI.Contracts.Appointment.DTOs.Specialist;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +21,9 @@ namespace AppointmentBookingAPI.Contracts.Appointment.Interfaces
         bool Deactivate(int specialistID, string currentUser);
 
         bool Reactivate(int specialistID, string currentUser);
+
+        SpecialistDto? GetByPersonID(int personID, string currentUser);
+
+        
     }
 }

@@ -1,28 +1,38 @@
 ﻿using AppointmentBookingAPI.Contracts.Auth.DTOs;
 using AppointmentBookingAPI.Contracts.Auth.Requests.User;
 using AppointmentBookingAPI.Contracts.Common;
-using AppointmentBookingAPI.Modules.Auth.User;
+using AppointmentBookingAPI.CurrentUser;
 using AppointmentBookingAPI.Mappers.Auth;
+using AppointmentBookingAPI.Modules.Auth.User;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppointmentBookingAPI.Controllers.Auth
 {
+    [Authorize(Roles = "Administrator")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
         private readonly UserService _service;
-        private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
+        private readonly CurrentUserService _currentUserService;
+
 
         public UsersController(
             UserService service,
-            IValidator<ChangePasswordRequest> changePasswordValidator)
+            IValidator<ChangePasswordRequest> changePasswordValidator,
+            CurrentUserService currentUserService)
         {
             _service = service;
-            _changePasswordValidator = changePasswordValidator;
+            _currentUserService = currentUserService;
+            
         }
+
+        private string CurrentUser => _currentUserService.GetUsername();
+
+
 
         [HttpPost("{personID:int}", Name = "AddUser")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -36,7 +46,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
                     "Invalid PersonID.",
                     null!));
 
-            int userID = _service.Add(personID, "Admin");
+            int userID = _service.Add(personID, CurrentUser);
 
             return CreatedAtAction(
                 nameof(GetByID),
@@ -48,36 +58,6 @@ namespace AppointmentBookingAPI.Controllers.Auth
         }
 
 
-        [HttpPut("ChangePassword", Name = "ChangeUserPassword")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult ChangePassword(ChangePasswordRequest request)
-        {
-            var validationResult = _changePasswordValidator.Validate(request);
-
-            var newPassword = ChangePasswordMapper.ToDto(request);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(new ApiResponse<List<string>>
-                (
-                    false,
-                    "Validation failed.",
-                    validationResult.Errors.Select(e => e.ErrorMessage).ToList()
-                ));
-            }
-
-            bool result = _service.ChangePassword(newPassword, "Admin");
-
-            return Ok(new ApiResponse<bool>(
-                success: true,
-                message: "Password changed successfully.",
-                data: result));
-        }
-
-
 
         [HttpPut("{userID:int}/Deactivate", Name = "DeactivateUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -85,7 +65,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Deactivate(int userID)
         {
-            bool result = _service.Deactivate(userID, "Admin");
+            bool result = _service.Deactivate(userID, CurrentUser);
 
             return Ok(new ApiResponse<bool>(
                 success: true,
@@ -101,7 +81,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Reactivate(int userID)
         {
-            bool result = _service.Reactivate(userID, "Admin");
+            bool result = _service.Reactivate(userID, CurrentUser);
 
             return Ok(new ApiResponse<bool>(
                 success: true,
@@ -117,7 +97,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByID(int userID)
         {
-            var user = _service.GetByID(userID, "Admin");
+            var user = _service.GetByID(userID, CurrentUser);
 
             return Ok(new ApiResponse<UserDto>(
                 success: true,
@@ -133,7 +113,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetByUsername(string username)
         {
-            var user = _service.GetByUsername(username, "Admin");
+            var user = _service.GetByUsername(username, CurrentUser);
 
             return Ok(new ApiResponse<UserDto>(
                 success: true,
@@ -148,7 +128,7 @@ namespace AppointmentBookingAPI.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetAll(bool? isActive = null)
         {
-            var users = _service.GetAll(isActive, "Admin");
+            var users = _service.GetAll(isActive, CurrentUser);
 
             return Ok(new ApiResponse<IEnumerable<UserDto>>(
                 success: true,
