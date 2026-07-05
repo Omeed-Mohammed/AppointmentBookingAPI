@@ -42,13 +42,12 @@ namespace AppointmentBookingAPI.Controllers.Auth
 
             var dto = LoginMapper.ToDto(request);
 
-            bool result = _service.Login(dto);
+            var token = _service.Login(dto);
 
-            return Ok(new ApiResponse<bool>(
-            result,
-            result ? "Login success." : "Invalid username or password.",
-            result
-        ));
+            return Ok(new ApiResponse<string>(
+            true,
+            "Login success.",
+            token ));
         }
     }
 }

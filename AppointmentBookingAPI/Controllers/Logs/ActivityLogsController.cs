@@ -2,6 +2,7 @@
 using AppointmentBookingAPI.Contracts.Logs.DTOs.ActivityLogs;
 using AppointmentBookingAPI.Modules.Logs;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
             _dateValidator = dateValidator;
         }
 
+
         [HttpGet("{logID:int}", Name = "GetActivityLogByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -36,6 +38,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
             return Ok(new ApiResponse<ActivityLogDto>(true, "Success.", log));
         }
 
+        [Authorize]
         [HttpGet(Name = "GetAllActivityLogs")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -45,6 +48,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
 
             return Ok(new ApiResponse<IEnumerable<ActivityLogDto>>(true, "Success.", logs));
         }
+
 
         [HttpGet("SearchByUser", Name = "SearchActivityLogsByUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -69,6 +73,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
             return Ok(new ApiResponse<IEnumerable<ActivityLogDto>>(true, "Success.", logs));
         }
 
+
         [HttpGet("SearchByDate", Name = "SearchActivityLogsByDate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -91,6 +96,7 @@ namespace AppointmentBookingAPI.Controllers.Logs
 
             return Ok(new ApiResponse<IEnumerable<ActivityLogDto>>(true, "Success.", logs));
         }
+
 
         [HttpDelete("DeleteByDate", Name = "DeleteActivityLogsByDate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
